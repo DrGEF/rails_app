@@ -74,6 +74,11 @@ describe "User pages" do
 	      end
 	    end
 
+	    describe 'unlogged user dont see signed buttons' do
+	      it { should_not have_link('Profile') }
+	      it { should_not have_link('Settings') }
+	    end
+
 	    describe "with valid information" do
 	      before do
 	        fill_in "Name",         with: "Example User"
@@ -105,6 +110,17 @@ describe "User pages" do
 	    	sign_in user
 	    	visit edit_user_path(user) 
 	    end
+
+	    describe 'простому смертному нельзя сделать себя администратором' do
+		    let(:params) do
+		      {user: {admin:true, password: user.password, password_confirmation: user.password}}
+		    end
+		    before do
+		      sign_in user, no_copybara: true
+		      patch user_path(user), params
+		    end
+		    it { expect(user.reload).not_to be_admin }
+		end
 
 	    describe "page" do
 	      it { should have_content("Update your profile") }
